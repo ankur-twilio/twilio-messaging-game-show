@@ -28,7 +28,7 @@ class ProcessMessageJob implements ShouldQueue, ShouldBeUnique
      */
     public function uniqueId()
     {
-        return $this->message->sid;
+        return $this->message->message_sid;
     }
 
     /**
