@@ -19,6 +19,7 @@ class GameshowController extends Controller
             $validatedData = $request->validate($this->validations());    
         }
         catch (\Exception $e) {
+            \Log::error($e);
             return response(null, 400);
         }
         
@@ -35,24 +36,24 @@ class GameshowController extends Controller
     }
 
     private function existingMessage($request) {
-        return Message::where('message_sid', $request->get('message_sid'))->exists();
+        return Message::where('message_sid', $request->get('MessageSid'))->exists();
     }
 
     private function validations() {
         return [
-            'message_sid' => 'required',
-            'from' => 'required',
-            'to' => 'required',
-            'body' => 'required'
+            'MessageSid' => 'required',
+            'From' => 'required',
+            'To' => 'required',
+            'Body' => 'required'
         ];
     }
 
     private function newMessage($request) {
         $message = new Message;
-        $message->message_sid = $request->get('message_sid');
-        $message->from = $request->get('from');
-        $message->to = $request->get('to');
-        $message->body = $request->get('body');
+        $message->message_sid = $request->get('MessageSid');
+        $message->from = $request->get('From');
+        $message->to = $request->get('To');
+        $message->body = $request->get('Body');
         $message->inbound = true;
         $message->save();
         return $message;

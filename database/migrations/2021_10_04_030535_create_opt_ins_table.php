@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateMessagesTable extends Migration
+class CreateOptInsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,13 @@ class CreateMessagesTable extends Migration
      */
     public function up()
     {
-        Schema::create('messages', function (Blueprint $table) {
+        Schema::create('opt_ins', function (Blueprint $table) {
             $table->id();
-            $table->string('message_sid')->nullable();
-            $table->string('from');
-            $table->string('to');
-            $table->text('body');
-            $table->boolean('inbound');
+            $table->unsignedInteger('person_id');
+            $table->text('source_description');
+            $table->string('program')->nullable();
+            $table->unsignedInteger('message_id')->nullable();
+            $table->string('opt_out_id')->nullable();
             $table->timestamps();
         });
     }
@@ -31,6 +31,6 @@ class CreateMessagesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('messages');
+        Schema::dropIfExists('opt_ins');
     }
 }

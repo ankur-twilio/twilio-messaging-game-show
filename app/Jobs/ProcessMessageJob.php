@@ -8,8 +8,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-
 use App\Models\Message;
+use App\Models\Person;
 
 class ProcessMessageJob implements ShouldQueue, ShouldBeUnique
 {
@@ -50,23 +50,34 @@ class ProcessMessageJob implements ShouldQueue, ShouldBeUnique
         $message = $this->message;
         $person = $this->identifyPerson();
         $handlerPrefix = '\\App\\Handlers\\';
-        $messageHandler = $messageHandler . 'FallbackHandler';
+        $messageHandler = $handlerPrefix . 'FallbackHandler';
+        $method = 'process'; 
 
         // Check the text to match preset global keywords (like STOP)
-        if ($globalKeyword = $this->message->matchesGlobalKeyword()) {
-            $messageHandler = $messageHandler . 'GlobalKeywordHandler';
+        if ($globalKeyword = $this->message->getKeywordMethod()) {
+            $messageHandler = $handlerPrefix . 'GlobalKeywordHandler';
         }
 
         // Check if message's person has an expected state
         else if ($stateHandler = $person->state_handler) {
-            $messageHandler = $messageHandler . $stateHandler;
+            $messageHandler = $handlerPrefix . $stateHandler;
+            $method = $person->state_data['method'] ?? 'stateFallback';
         }
 
         // Use a provided default handler
         else if ($this->messageHandler) {
-            $messageHandler = $messageHandler . $messageHandler;
+            $messageHandler = $handlerPrefix . $this->messageHandler;
         }
 
-        return new $messageHandler($message, $person);
+        return (new $messageHandler($message, $person))->$method();
+    }
+
+    private function identifyPerson() {
+        if (!$person = Person::where('identity', $this->message->from)->first()) {
+            $person = new Person;
+            $person->identity = $this->message->from;
+            $person->save();
+        }
+        return $person;
     }
 }

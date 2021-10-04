@@ -33,6 +33,7 @@ return [
     'twilio' => [
         'sid' => env('TWILIO_ACCOUNT_SID'),
         'token' => env('TWILIO_TOKEN'),
+        'sync_service' => env('TWILIO_SYNC_SERVICE'),
     ],
 
 
