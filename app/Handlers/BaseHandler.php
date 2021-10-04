@@ -80,7 +80,7 @@ class BaseHandler
 
             Log::error($errorData);
         }
-
+        
         $this->storeTwilioRequest($this->twilio->getHttpClient()->lastResponse->getHeaders(), 'basehandler-executesend');
     }
 
