@@ -24,3 +24,7 @@ Route::prefix('twilio')->middleware(['twilio'])->group(function () {
     Route::get('/gameshow', [GameshowController::class, 'index']);
     Route::post('/gameshow', [GameshowController::class, 'index']);
 });
+
+Route::prefix('jobs')->group(function () {
+    Route::queueMonitor();
+});

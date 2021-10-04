@@ -10,10 +10,12 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Message;
 use App\Models\Person;
+use romanzipp\QueueMonitor\Traits\IsMonitored;
 
 class ProcessMessageJob implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use IsMonitored; 
 
     private $message; 
     private $messageHandler; 

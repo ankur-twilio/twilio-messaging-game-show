@@ -64,7 +64,7 @@ class GameshowHandler extends BaseHandler {
         return $this->newSend(
             $this->message->to,
             $this->message->from,
-            'Thanks, ' . $this->player->friendly_name . '! Please watch the screen for more instructions!.'
+            'Thanks, ' . $this->player->friendly_name . '! Please watch the screen for more instructions!'
         );
 	}
 
