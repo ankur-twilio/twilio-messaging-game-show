@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\GameshowController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -15,4 +17,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
+});
+
+
+Route::prefix('twilio')->middleware(['twilio'])->group(function () {
+    Route::get('/gameshow', [GameshowController::class, 'index']);
+    Route::post('/gameshow', [GameshowController::class, 'index']);
 });
