@@ -16,8 +16,8 @@ class CreateTwilioRequestsTable extends Migration
         Schema::create('twilio_requests', function (Blueprint $table) {
             $table->id();
             $table->string('request_id')->nullable();
-            $table->decimal('concurrent_requests', 5, 4)->nullable();
-            $table->decimal('request_duration', 5, 4)->nullable();
+            $table->decimal('concurrent_requests', 10, 5)->nullable();
+            $table->decimal('request_duration', 10, 5)->nullable();
             $table->string('tag')->nullable();
             $table->timestamps();
         });
