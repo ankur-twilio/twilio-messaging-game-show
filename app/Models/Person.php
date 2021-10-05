@@ -53,7 +53,7 @@ class Person extends Model
     public function optIn($description, $messageId = null, $program = null) {
         $optIn = new OptIn;
         $optIn->person_id = $this->id;
-        $optIn->description = $description;
+        $optIn->source_description = $description;
         $optIn->message_id = $messageId;
         $optIn->program = $program;
         $optIn->save();

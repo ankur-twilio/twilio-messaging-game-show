@@ -15,8 +15,9 @@ class GameshowController extends Controller
 
     public function index(Request $request)
     {
+        Log::info('Incoming message...');
         try {
-            $validatedData = $request->validate($this->validations());    
+            $validatedData = $request->validate($this->validations());   
         }
         catch (\Exception $e) {
             \Log::error($e);

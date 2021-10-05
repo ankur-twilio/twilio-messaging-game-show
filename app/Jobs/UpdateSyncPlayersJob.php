@@ -15,22 +15,22 @@ use App\Traits\StoresTwilioRequests;
 use Twilio\Rest\Client as TwilioClient;
 use Twilio\Exceptions\TwilioException;
 
-use App\Models\Question;
+use App\Models\Game;
 
 use Log;
 
-class UpdateSyncJob implements ShouldQueue, ShouldBeUnique
+class UpdateSyncPlayersJob implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StoresTwilioRequests;
     use IsMonitored; 
 
-    private $question;
+    private $game;
     private $twilio;
     public $tries = 1;
 
     public function uniqueId()
     {
-        return $this->question->id;
+        return $this->game->id;
     }
 
     /**
@@ -38,14 +38,14 @@ class UpdateSyncJob implements ShouldQueue, ShouldBeUnique
      *
      * @return void
      */
-    public function __construct(Question $question)
+    public function __construct(Game $game)
     {
-        $this->question = $question;
+        $this->game = $game;
         $this->twilio = new TwilioClient(
             config('services.twilio.sid'), 
             config('services.twilio.token')
         );
-        \Log::info('Update for ' . $this->question->id . ' dispatched');
+        \Log::info('Sync players update for ' . $this->game->id . ' dispatched');
     }
 
     /**
@@ -55,19 +55,21 @@ class UpdateSyncJob implements ShouldQueue, ShouldBeUnique
      */
     public function handle()
     {
-        $mapName = 'game-'.$this->question->game_id;
-        $mapItemName = 'game-'.$this->question->game_id.'-question-'.$this->question->id;
-        $data = $this->question->getFormattedAnswerArray();
-        return $this->updateSyncMap($mapName, $mapItemName, $data);
+        $players = $this->game->players()->whereNotNull('friendly_name')->pluck('friendly_name')->toArray();
+        return $this->updateSync($players);
     }
 
-    private function updateSyncMap($mapName, $mapItemName, $data) {
+    private function updateSync($players) {
         try {
+            $mapItemName = $this->game->sync_map . '-players';
+
             $this->twilio->sync->v1->services(config('services.twilio.sync_service'))
-                ->syncMaps($mapName)
+                ->syncMaps($this->game->sync_map)
                 ->syncMapItems($mapItemName)
-                ->update(["data" => $data]);
-            $this->storeTwilioRequest($this->twilio->getHttpClient()->lastResponse->getHeaders(), 'updatesyncjob-handler');
+                ->update(["data" => ['players' => $players]]);
+
+            $this->storeTwilioRequest($this->twilio->getHttpClient()->lastResponse->getHeaders(), 'updatesyncplayersjob-handler');
+
             \Log::info('Update for ' . $mapItemName . ' succeeded');
         }
         catch (TwilioException $e) {

@@ -41,38 +41,47 @@ class AssignMapsAndMapItemsJob implements ShouldQueue
     public function handle()
     {
         Game::whereNull('sync_map')->get()->each(function ($game) {
-            $name = 'game-'.$game->id;
-            try {
-                $this->twilio->sync->v1->services(config('services.twilio.sync_service'))
-                ->syncMaps
-                ->create(["uniqueName" => $name]);
-                $this->storeTwilioRequest($this->twilio->getHttpClient()->lastResponse->getHeaders(), 'assignmapsandmapitemsjob-map');
-            }
-            catch (TwilioException $e) {
-                \Log::error('SyncMap Error: ' . $e->getCode());
-            }
-
-            $game->sync_map = $name;
+            $mapName = 'game-'.$game->id;
+            $this->createMap($mapName);
+            $this->createMapItem($mapName, $mapName.'-players');
+            $game->sync_map = $mapName;
             $game->save();    
         });
 
         Question::whereNull('sync_map_item')->get()->each(function ($question) {
             $mapName = 'game-'.$question->game_id;
             $mapItemName = 'game-'.$question->game_id.'-question-'.$question->id;
-            try {
-                $this->twilio->sync->v1->services(config('services.twilio.sync_service'))
-                ->syncMaps($mapName)
-                ->syncMapItems
-                ->create($mapItemName, ['test' => 'ttest']);
-                $this->storeTwilioRequest($this->twilio->getHttpClient()->lastResponse->getHeaders(), 'assignmapsandmapitemsjob-mapitem');
-            }
-            catch (TwilioException $e) {
-                \Log::error('SyncMapItem Error: ' . $e->getCode());
-            }
+
+            $this->createMapItem($mapName, $mapItemName);
 
             $question->sync_map_item = $mapItemName;
             $question->save();
         });
+    }
 
+    private function createMap($mapName) {
+        try {
+            $this->twilio->sync->v1->services(config('services.twilio.sync_service'))
+            ->syncMaps
+            ->create(["uniqueName" => $mapName]);
+        }
+        catch (TwilioException $e) {
+            \Log::error('SyncMap Error: ' . $e->getCode());
+        }
+        $this->storeTwilioRequest($this->twilio->getHttpClient()->lastResponse->getHeaders(), 'assignmapsandmapitemsjob-map');
+    }
+
+    private function createMapItem($mapName, $mapItemName) {
+        try {
+            $this->twilio->sync->v1->services(config('services.twilio.sync_service'))
+            ->syncMaps($mapName)
+            ->syncMapItems
+            ->create($mapItemName, ['status' => 'new']);
+        }
+        catch (TwilioException $e) {
+            \Log::error('SyncMapItem Error: ' . $e->getCode());
+        }
+        
+        $this->storeTwilioRequest($this->twilio->getHttpClient()->lastResponse->getHeaders(), 'assignmapsandmapitemsjob-mapitem');
     }
 }

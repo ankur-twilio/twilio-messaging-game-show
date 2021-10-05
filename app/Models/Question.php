@@ -15,6 +15,8 @@ class Question extends Model
         'options' => 'array',
     ];
 
+    public $fillable = ['active'];
+
     /**
      *
      * Relationships
@@ -32,11 +34,20 @@ class Question extends Model
      */
 
     public function getFormattedAnswerArray() {
-        $answersArray = $this->answerRecords()
-             ->select(DB::raw('count(*) as answer_count, answer'))
-             ->groupBy('answer')
-             ->get()
-             ->toArray();
+        if ($this->type == 'free_response') {
+            $answersArray = $this->answerRecords()
+                ->select('answer', 'created_at')
+                ->orderBy('created_at', 'ASC')
+                ->get()
+                ->toArray();
+        }
+        else {
+            $answersArray = $this->answerRecords()
+                ->select(DB::raw('count(*) as answer_count, answer'))
+                ->groupBy('answer')
+                ->get()
+                ->toArray();            
+            }
              
         $count = $this->answerRecords()->count();
         

@@ -11,7 +11,5 @@ const mix = require('laravel-mix');
  |
  */
 
-mix.js('resources/js/app.js', 'public/js')
-    .postCss('resources/css/app.css', 'public/css', [
-        //
-    ]);
+mix.js('resources/welcome-se-event/js/app.js', 'public/welcome-se-event/js')
+    .sass('resources/welcome-se-event/css/app.scss', 'public/welcome-se-event/css');

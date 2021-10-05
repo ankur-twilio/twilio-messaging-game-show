@@ -11,6 +11,8 @@ class GlobalKeywordHandler extends BaseHandler
     public function process()
     {
         $method = $this->message->getKeywordMethod();
+        \Log::info('Keyword Handler: ' . $method);
+        \Log::info('Person ID: ' . $this->person->id);
         return $this->$method();
     }
 
@@ -34,9 +36,9 @@ class GlobalKeywordHandler extends BaseHandler
 
     private function subscribe() {
         $this->person->optIn(
-            'MARKETING', 
             'User texted in an opt in.',
-            $this->message->id
+            $this->message->id,
+            'MARKETING'
         );
 
         return $this->newSend(

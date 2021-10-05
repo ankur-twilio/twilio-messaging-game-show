@@ -20,8 +20,20 @@ class Game extends Model
         return $this->hasMany(Question::class);
     }
 
+    public function players() {
+        return $this->hasMany(Player::class);
+    }
+
     public function activeQuestion() {
         return $this->questions()->where('active', true)->first();
+    }
+
+    public function setActiveQuestion(Question $question) {
+        $question->active = 1;
+        $question->save();
+        Question::where('game_id', $this->id)
+            ->where('id', '!=', $question->id)
+            ->update(['active' => 0]);
     }
 
 }

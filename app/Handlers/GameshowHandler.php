@@ -7,9 +7,11 @@ use App\Models\OptIn;
 use App\Models\Person;
 use App\Models\Player;
 use App\Models\Game;
+use App\Exceptions\NotOptedInException;
 use Log;
 
 use App\Jobs\UpdateSyncJob;
+use App\Jobs\UpdateSyncPlayersJob;
 
 class GameshowHandler extends BaseHandler {
 
@@ -30,8 +32,7 @@ class GameshowHandler extends BaseHandler {
 				'person' => $person->id,
 				'description' => 'Exiting. User not opted in.'
 			];
-			\Log::error($error);
-			throw new \Exception($error['description']);
+			throw new NotOptedInException(implode(',',$error));
 		}
 
 		$this->game = Game::where('active', 1)->first();
@@ -60,6 +61,8 @@ class GameshowHandler extends BaseHandler {
 			'GameshowHandler', 
 			['method' => 'answeringQuestions']
 		);
+		
+		UpdateSyncPlayersJob::dispatch($this->game);
 
         return $this->newSend(
             $this->message->to,
@@ -85,7 +88,6 @@ class GameshowHandler extends BaseHandler {
 		if ($response = $this->player->answer($question, $this->message, $cleanMsg)) {
 
 			Log::info($response);
-
 
 			if ($response['type'] === 'UPDATED') {
 				UpdateSyncJob::dispatch($question);

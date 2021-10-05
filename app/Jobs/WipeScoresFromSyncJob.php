@@ -15,22 +15,22 @@ use App\Traits\StoresTwilioRequests;
 use Twilio\Rest\Client as TwilioClient;
 use Twilio\Exceptions\TwilioException;
 
-use App\Models\Question;
+use App\Models\Game;
 
 use Log;
 
-class UpdateSyncJob implements ShouldQueue, ShouldBeUnique
+class WipeScoresFromSyncJob implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StoresTwilioRequests;
     use IsMonitored; 
 
-    private $question;
+    private $game;
     private $twilio;
     public $tries = 1;
 
     public function uniqueId()
     {
-        return $this->question->id;
+        return $this->game->id;
     }
 
     /**
@@ -38,14 +38,14 @@ class UpdateSyncJob implements ShouldQueue, ShouldBeUnique
      *
      * @return void
      */
-    public function __construct(Question $question)
+    public function __construct(Game $game)
     {
-        $this->question = $question;
+        $this->game = $game;
         $this->twilio = new TwilioClient(
             config('services.twilio.sid'), 
             config('services.twilio.token')
         );
-        \Log::info('Update for ' . $this->question->id . ' dispatched');
+        \Log::info('Sync wipe for ' . $this->game->id . ' dispatched');
     }
 
     /**
@@ -55,20 +55,27 @@ class UpdateSyncJob implements ShouldQueue, ShouldBeUnique
      */
     public function handle()
     {
-        $mapName = 'game-'.$this->question->game_id;
-        $mapItemName = 'game-'.$this->question->game_id.'-question-'.$this->question->id;
-        $data = $this->question->getFormattedAnswerArray();
-        return $this->updateSyncMap($mapName, $mapItemName, $data);
+        foreach($this->game->questions as $question) {
+            $mapItemName = $this->game->sync_map . '-question-' . $question->id;
+            $this->clearSyncItem($question);
+        }
+        $mapItemName = $this->game->sync_map . '-players';
+        $this->clearSyncItem($mapItemName);
+        return true;
     }
 
-    private function updateSyncMap($mapName, $mapItemName, $data) {
+    private function clearSyncItem($mapItemName) {
         try {
             $this->twilio->sync->v1->services(config('services.twilio.sync_service'))
-                ->syncMaps($mapName)
+                ->syncMaps($this->game->sync_map)
                 ->syncMapItems($mapItemName)
-                ->update(["data" => $data]);
+                ->update(["data" => [
+                    'status' => 'new'
+                ]]);
+
             $this->storeTwilioRequest($this->twilio->getHttpClient()->lastResponse->getHeaders(), 'updatesyncjob-handler');
-            \Log::info('Update for ' . $mapItemName . ' succeeded');
+
+            \Log::info('Wipe for ' . $mapItemName . ' succeeded');
         }
         catch (TwilioException $e) {
             Log::error($e);

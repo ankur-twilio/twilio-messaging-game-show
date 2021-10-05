@@ -11,6 +11,8 @@ use Illuminate\Queue\SerializesModels;
 use App\Models\Message;
 use App\Models\Person;
 use romanzipp\QueueMonitor\Traits\IsMonitored;
+use App\Exceptions\NotOptedInException;
+use Log;
 
 class ProcessMessageJob implements ShouldQueue, ShouldBeUnique
 {
@@ -71,7 +73,13 @@ class ProcessMessageJob implements ShouldQueue, ShouldBeUnique
             $messageHandler = $handlerPrefix . $this->messageHandler;
         }
 
-        return (new $messageHandler($message, $person))->$method();
+        try {
+            return (new $messageHandler($message, $person))->$method();            
+        }
+        catch (NotOptedInException $e) {
+            return Log::error('ProcessMessageJob.php: ' . $e->getMessage());
+        }
+
     }
 
     private function identifyPerson() {

@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\WelcomeSEEventController;
 use App\Http\Controllers\GameshowController;
 
 /*
@@ -15,10 +16,11 @@ use App\Http\Controllers\GameshowController;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
+Route::get('/', [WelcomeSEEventController::class, 'index']);
+Route::get('/game/{game}', [WelcomeSEEventController::class, 'game']);
+Route::get('/game/{game}/questions', [WelcomeSEEventController::class, 'questions']);
+Route::post('/game/{game}/wipe', [WelcomeSEEventController::class, 'wipe']);
+Route::get('/game/{game}/question/{question}', [WelcomeSEEventController::class, 'question']);
 
 Route::prefix('twilio')->middleware(['twilio'])->group(function () {
     Route::get('/gameshow', [GameshowController::class, 'index']);
