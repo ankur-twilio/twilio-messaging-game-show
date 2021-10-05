@@ -19,20 +19,20 @@ $(document).ready(function () {
     }
 
     item.answers.forEach(function (option) {
-      var counter = $('#key-' + option.answer + '-count');
+      var counter = $('#fake_element_hack_sorry');
+
+      if (option.answer.length == 1) {
+        counter = $('#key-' + option.answer + '-count');
+      }
+
       var frqs = $('#free_response');
 
       if (counter.length) {
         counter.html(option.answer_count);
       } else if (frqs.length) {
         item.answers.forEach(function (answer_obj, key) {
-          console.log(shownFRQs);
-          console.log(key);
-          console.log(answer_obj.answer);
-
           if (shownFRQs.indexOf(key) == -1) {
             shownFRQs.push(key);
-            console.log(answer_obj.answer);
             var frq = '<li>' + answer_obj.answer + '</li>';
             frqs.append(frq);
           }

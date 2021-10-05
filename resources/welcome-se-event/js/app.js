@@ -8,7 +8,11 @@ $(document).ready(function() {
       return console.log(item);
     }
     item.answers.forEach((option) => {
-      let counter = $('#key-'+option.answer+'-count');
+      let counter = $('#fake_element_hack_sorry');
+      if (option.answer.length == 1) {
+        counter = $('#key-'+option.answer+'-count');
+      }
+      
       let frqs = $('#free_response');
 
       if (counter.length) {
@@ -16,12 +20,8 @@ $(document).ready(function() {
       }
       else if (frqs.length) {
         item.answers.forEach((answer_obj, key) => {
-          console.log(shownFRQs);
-          console.log(key);
-          console.log(answer_obj.answer);
           if (shownFRQs.indexOf(key) == -1) {
             shownFRQs.push(key);
-            console.log(answer_obj.answer);
             let frq = '<li>'+answer_obj.answer+'</li>';
             frqs.append(frq);
           }
