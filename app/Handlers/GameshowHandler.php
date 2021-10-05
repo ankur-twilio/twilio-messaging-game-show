@@ -155,7 +155,7 @@ class GameshowHandler extends BaseHandler {
         return $this->newSend(
             $this->message->to,
             $this->message->from,
-            'Welcome welcome! Please enter your full-name/username/what-have-you to ID yourself for the session!'
+            'Welcome welcome! Please enter your slack handle or a pseudonym to ID yourself for the session!'
         );
 	}
 }
