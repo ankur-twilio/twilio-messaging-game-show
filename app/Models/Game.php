@@ -29,14 +29,11 @@ class Game extends Model
     }
 
     public function setActiveQuestion(Question $question) {
-        \Log::error($question);
         $question->active = 1;
         $question->save();
-        \Log::error($question);
         Question::where('game_id', $this->id)
             ->where('id', '!=', $question->id)
             ->update(['active' => 0]);
-        \Log::error($this->questions);
     }
 
 }
