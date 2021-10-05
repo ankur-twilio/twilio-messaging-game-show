@@ -57,7 +57,7 @@ class WipeScoresFromSyncJob implements ShouldQueue, ShouldBeUnique
     {
         foreach($this->game->questions as $question) {
             $mapItemName = $this->game->sync_map . '-question-' . $question->id;
-            $this->clearSyncItem($question);
+            $this->clearSyncItem($mapItemName);
         }
         $mapItemName = $this->game->sync_map . '-players';
         $this->clearSyncItem($mapItemName);
