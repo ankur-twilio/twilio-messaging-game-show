@@ -29,7 +29,7 @@ class WelcomeSEEventController extends Controller
     }
 
     public function question(Game $game, Question $question) {
-        \Log::info($question);
+        \Log::error($question);
         $game->setActiveQuestion($question);
         return view('welcome-se-event.question', compact('game', 'question'));
     }
